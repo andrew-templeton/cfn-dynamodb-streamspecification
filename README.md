@@ -1,10 +1,3 @@
-# cfn-dynamodb-streamspecification
-Adds support for DynamoDB Stream functionality to AWS CloudFormation
-
-> At the moment this is a work in progress. Check back soon, it should be working soon enough.
-
-This project relies heavily on [cfn-lambda](https://github.com/andrew-templeton/cfn-lambda/) which was built by [Andrew Templeton](https://github.com/andrew-templeton) who is a contributor to this project as well.
-
 
 
 # cfn-dynamodb-streamspecification
@@ -15,7 +8,7 @@ This project relies heavily on [cfn-lambda](https://github.com/andrew-templeton/
 AWS CloudFormation does not support AWS DynamoDB Streams (`StreamSpecification`s). This is a Lambda-backed custom resource to add [AWS DynamoDB's Streams](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html) to CloudFormation.
 
 [This package on NPM](https://www.npmjs.com/package/cfn-dynamodb-streamspecification)  
-[This package on GitHub](https://www.github.com/alex-jestin-taylor/cfn-dynamodb-streamspecification)
+[This package on GitHub](https://www.github.com/andrew-templeton/cfn-dynamodb-streamspecification)
 
 
 ## Implementation
@@ -85,7 +78,7 @@ You will have this resource installed in every supported Region globally!
 
 ##### Collaboration & Requests
 
-Submit pull requests or Tweet to one us (Alex [@omgnvm](https://twitter.com/omgnvm) / Andrew [@ayetempleton](https://twitter.com/ayetempleton)) if you want to get involved with roadmap as well, or if you want to do this for a living :)
+Submit pull requests or Tweet to one us (Andrew [@ayetempleton](https://twitter.com/ayetempleton) / Alex [@omgnvm](https://twitter.com/omgnvm)) if you want to get involved with roadmap as well, or if you want to do this for a living :)
 
 
 ##### License
@@ -95,6 +88,6 @@ Submit pull requests or Tweet to one us (Alex [@omgnvm](https://twitter.com/omgn
 
 ##### Want More CloudFormation Custom Resources?
 
-Work is (extremely) active by our contributors, published here:  
-[Alex Jestin Taylor's NPM Account](https://www.npmjs.com/~alex-jestin-taylor)  
+Work is (extremely) active by our contributors, published here:    
 [Andrew Templetons's NPM Account](https://www.npmjs.com/~andrew-templeton)
+[Alex Jestin Taylor's NPM Account](https://www.npmjs.com/~alex-jestin-taylor)

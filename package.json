@@ -1,23 +1,28 @@
 {
   "name": "cfn-dynamodb-streamspecification",
   "version": "0.1.1",
-  "description": "CloudFormation DynamoDB Stream Specification",
+  "description": "Custom::DynamoDBStreamSpecification | AWS CloudFormation Custom Resource | DynamoDB StreamSpecification",
   "main": "index.js",
   "scripts": {
     "cfn-lambda-deploy": "chmod +x ./node_modules/cfn-lambda/deploy.sh && ./node_modules/cfn-lambda/deploy.sh;"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alex-jestin-taylor/cfn-dynamodb-streamspecification.git"
+    "url": "git+https://github.com/andrew-templeton/cfn-dynamodb-streamspecification.git"
   },
   "keywords": [
     "dynamodb",
-    "cloudfront",
+    "cloudformation",
     "custom",
+    "lambda",
+    "backed",
     "resource",
     "aws",
     "stream",
-    "lambda"
+    "specification",
+    "streamspecification",
+    "trigger",
+    "cfn"
   ],
   "author": "Andrew Templeton <andrw.tmplton@gmail.com> (https://github.com/andrew-templeton)",
   "contributors": [
@@ -25,9 +30,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alex-jestin-taylor/cfn-dynamodb-streamspecification/issues"
+    "url": "https://github.com/andrew-templeton/cfn-dynamodb-streamspecification/issues"
   },
-  "homepage": "https://github.com/alex-jestin-taylor/cfn-dynamodb-streamspecification#readme",
+  "homepage": "https://github.com/andrew-templeton/cfn-dynamodb-streamspecification#readme",
   "dependencies": {
     "cfn-lambda": "0.6.1"
   }
