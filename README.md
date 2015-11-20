@@ -96,5 +96,5 @@ Submit pull requests or Tweet to one us (Andrew [@ayetempleton](https://twitter.
 ##### Want More CloudFormation Custom Resources?
 
 Work is (extremely) active by our contributors, published here:    
-[Andrew Templetons's NPM Account](https://www.npmjs.com/~andrew-templeton)
+[Andrew Templetons's NPM Account](https://www.npmjs.com/~andrew-templeton)  
 [Alex Jestin Taylor's NPM Account](https://www.npmjs.com/~alex-jestin-taylor)
