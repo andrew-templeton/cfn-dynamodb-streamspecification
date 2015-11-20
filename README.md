@@ -27,10 +27,17 @@ This Lambda makes use of the Lambda-Backed CloudFormation Custom Resource flow m
         "ServiceToken": "arn:aws:lambda:<cfn-region-id>:<your-account-id>:function:<this-deployed-lambda-name>",
         "TableName": { "Ref": "MyDynamoDBTable" }, // REQUIRED
         "StreamViewType": "NEW_IMAGE"             // REQUIRED enum (line below)
-        	// Values: NEW_IMAGE | OLD_IMAGE | NEW_AND_OLD_IMAGES | KEYS_ONLY
+          // Values: NEW_IMAGE | OLD_IMAGE | NEW_AND_OLD_IMAGES | KEYS_ONLY
         }
       }
     }
+
+#### `Ref` and `Fn::GetAtt`
+
+
+`Ref` does not return the ARN, it returns the `<table>::<viewType>` and is used internally for state management on `UPDATE` actions.
+
+`Fn::GetAtt` has one property, `Arn`. This returns the table's `LatestStreamArn`.
 
 
 ## Installation of the Resource Service Lambda
