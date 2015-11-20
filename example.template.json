@@ -1,0 +1,306 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Lambda DynamoDB Stream Triggers",
+  "Parameters": {
+    "DynamoDBStreamCustomResourceLambdaName": {
+      "Type": "String",
+      "Default": "cfn-dynamodb-streamspecification-0-1-1",
+      "Description": "The name of the DynamoDB Stream Custom Resource Lambda you deployed to test this stack."
+    },
+    "StreamViewType": {
+      "Type": "String",
+      "Description": "The record change ViewType type to send to the Lambda logging DynamoDB events.",
+      "AllowedValues": [
+        "NEW_IMAGE",
+        "OLD_IMAGE",
+        "NEW_AND_OLD_IMAGES",
+        "KEYS_ONLY"
+      ],
+      "Default": "NEW_IMAGE"
+    },
+    "MyTableToUse": {
+      "Type": "String",
+      "AllowedValues": [
+        "Alpha",
+        "Beta"
+      ],
+      "Default": "Alpha",
+      "Description": "Toggle this to demo swapping which table a StreamSpecification works off of."
+    }
+  },
+  "Conditions": {
+    "UsingAlphaTable": {
+      "Fn::Equals": [
+        "Alpha",
+        {
+          "Ref": "MyTableToUse"
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "MyDynamoDBTableAlpha": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 10,
+          "WriteCapacityUnits": 10
+        }
+      }
+    },
+    "MyDynamoDBTableBeta": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 10,
+          "WriteCapacityUnits": 10
+        }
+      }
+    },
+    "MyDynamoDBStreamSpecification": {
+      "Type": "Custom::DynamoDBStreamSpecification",
+      "DependsOn": [
+        "MyDynamoDBTableAlpha",
+        "MyDynamoDBTableBeta"
+      ],
+      "Properties": {
+        "ServiceToken": {
+          "Fn::Join": [
+            ":",
+            [
+              "arn",
+              "aws",
+              "lambda",
+              {
+                "Ref": "AWS::Region"
+              },
+              {
+                "Ref": "AWS::AccountId"
+              },
+              "function",
+              {
+                "Ref": "DynamoDBStreamCustomResourceLambdaName"
+              }
+            ]
+          ]
+        },
+        "TableName": {
+          "Fn::If": [
+            "UsingAlphaTable",
+            {
+              "Ref": "MyDynamoDBTableAlpha"
+            },
+            {
+              "Ref": "MyDynamoDBTableBeta"
+            }
+          ]
+        },
+        "StreamViewType": {
+          "Ref": "StreamViewType"
+        }
+      }
+    },
+    "MyLambdaDynamoDBTrigger": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": [
+        "LambdaExecutionRole",
+        "LambdaExecutionPolicy"
+      ],
+      "Properties": {
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [
+              "\n",
+              [
+                "// Demonstrate the Lambda sees DynamoDB Table updates",
+                "console.log('Loading function');",
+                "exports.handler = function(event, context) {",
+                "  console.log('Received event: %j',event);",
+                "  event.Records.forEach(function(record) {",
+                "    console.log(record.eventID);",
+                "    console.log(record.eventName);",
+                "    console.log('DynamoDB Record: %j',record.dynamodb);",
+                "  });",
+                "  console.log('Processed %s records!', event.Records.length);",
+                "  context.done();",
+                "};",
+                ""
+              ]
+            ]
+          }
+        },
+        "Runtime": "nodejs",
+        "Timeout": 10
+      }
+    },
+    "MyLambdaEventSourceMapping":{
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": [
+        "MyDynamoDBStreamSpecification",
+        "MyLambdaDynamoDBTrigger",
+        "LambdaExecutionPolicy",
+        "LambdaExecutionRole"
+      ],
+      "Properties": {
+        "BatchSize": 100,
+        "Enabled": true,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "MyDynamoDBStreamSpecification",
+            "Arn"
+          ]
+        },
+        "FunctionName": {
+          "Ref": "MyLambdaDynamoDBTrigger"
+        },
+        "StartingPosition": "TRIM_HORIZON"
+      }
+    },
+    "LambdaExecutionPolicy": {
+      "DependsOn": [
+        "MyDynamoDBStreamSpecification",
+        "MyDynamoDBTableAlpha",
+        "MyDynamoDBTableBeta",
+        "LambdaExecutionRole"
+      ],
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "MyLambdaDynamoDBTriggerRolePolicy",
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:DescribeStream",
+                "dynamodb:ListStreams",
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": [
+                "*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    }
+  },
+  "Outputs": {
+    "ConsoleLinkForTableCreated": {
+      "Description": "Click this link, go to the Items subtab, hit Create Item, make an item, then click the other Output link to see the demo stack working.",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://console.aws.amazon.com/dynamodb/home?region=",
+            {
+              "Ref": "AWS::Region"
+            },
+            "#tables:selected=",
+            {
+              "Fn::If": [
+                "UsingAlphaTable",
+                {
+                  "Ref": "MyDynamoDBTableAlpha"
+                },
+                {
+                  "Ref": "MyDynamoDBTableBeta"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "ConsoleLinkForTriggerLambdaLogStream": {
+      "Description": "Follow the link to see trigger logging working!",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://console.aws.amazon.com/cloudwatch/home?region=",
+            {
+              "Ref": "AWS::Region"
+            },
+            "#logStream:group=/aws/lambda/",
+            {
+              "Ref": "MyLambdaDynamoDBTrigger"
+            },
+            ";"
+          ]
+        ]
+      }
+    }
+  }
+}
